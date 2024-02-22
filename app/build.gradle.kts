@@ -44,12 +44,16 @@ dependencies {
 
     implementation("io.coil-kt:coil:2.5.0")
 
-    val fragmentVersion = "1.6.2"
+    val fragmentVersion = "2.3.5"
 
     // Java language implementation
     implementation("androidx.fragment:fragment-ktx:$fragmentVersion")
     // Kotlin
     implementation("androidx.fragment:fragment-ktx:$fragmentVersion")
+
+    // LiveData and ViewModel
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
