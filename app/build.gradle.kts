@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia"
-        minSdk = 31
+        minSdk = 30
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -34,13 +34,19 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
     implementation("com.google.devtools.ksp:symbol-processing-api:1.9.22-1.0.17")
     implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
     ksp("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
+    implementation("androidx.sqlite:sqlite-ktx:2.4.0") // Usa una versión válida
 
     implementation("io.coil-kt:coil:2.5.0")
 
