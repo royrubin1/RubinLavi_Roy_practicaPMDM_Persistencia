@@ -4,49 +4,92 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.R
+import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.Task
+import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.TaskAdapter
+import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.databinding.FragmentTasksBinding
 
 class TasksFragment : Fragment() {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var viewAdapter: RecyclerView.Adapter<*>
-    private lateinit var viewManager: RecyclerView.LayoutManager
+    private var _binding: FragmentTasksBinding? = null
+    private val binding get() = _binding!!
+    private lateinit var taskAdapter: TaskAdapter
+    private var allTasks = listOf<Task>()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_tasks, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        _binding = FragmentTasksBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupRecyclerView()
+        setupSpinner()
+        initializeTasks()
+    }
 
-        viewManager = LinearLayoutManager(context)
-        viewAdapter = MyAdapter(arrayListOf("Tarea 1", "Tarea 2", "Tarea 3"))
+    private fun initializeTasks() {
+        allTasks = listOf(
+            Task("Tarea 1", "Descripción de la tarea 1", "Acceso a Datos"),
+            Task("Tarea 2", "Descripción de la tarea 2", "Programación Multimedia y Dispositivos Móviles"),
+            Task("Tarea 3", "Descripción de la tarea 3", "Desarrollo de Interfaces"),
+            Task("Tarea 4", "Descripción de la tarea 4", "Sistemas de Gestión Empresarial"),
+            Task("Tarea 5", "Descripción de la tarea 5", "Acceso a Datos")
+        )
+        taskAdapter.updateTasks(allTasks)
+    }
 
-        recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView).apply {
-            setHasFixedSize(true)
-            layoutManager = viewManager
-            adapter = viewAdapter
+    private fun filterTasks(module: String) {
+        val filteredTasks = if (module == "Todos los módulos") {
+            allTasks
+        } else {
+            allTasks.filter { it.module == module }
+        }
+        taskAdapter.updateTasks(filteredTasks)
+    }
+
+    private fun setupSpinner() {
+        val modules = arrayOf("Todos los módulos", "Acceso a Datos", "Programación Multimedia y Dispositivos Móviles", "Desarrollo de Interfaces", "Sistemas de Gestión Empresarial")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, modules)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerModules.adapter = adapter
+
+        binding.spinnerModules.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                filterTasks(modules[position])
+            }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+                TODO("Not yet implemented")
+            }
         }
     }
-}
 
-class MyAdapter(private val myDataset: ArrayList<String>) :
-    RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
+    private fun setupRecyclerView() {
+        taskAdapter = TaskAdapter(allTasks)
 
-    class MyViewHolder(val textView: TextView) : RecyclerView.ViewHolder(textView)
+        binding.recyclerViewTasks.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = taskAdapter
+        }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        val textView = LayoutInflater.from(parent.context).inflate(android.R.layout.simple_list_item_1, parent, false) as TextView
-        return MyViewHolder(textView)
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                allTasks[position].isDone = !allTasks[position].isDone
+                taskAdapter.notifyItemChanged(position)
+            }
+        })
+        itemTouchHelper.attachToRecyclerView(binding.recyclerViewTasks)
     }
 
-    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.textView.text = myDataset[position]
-    }
-
-    override fun getItemCount() = myDataset.size
 }
