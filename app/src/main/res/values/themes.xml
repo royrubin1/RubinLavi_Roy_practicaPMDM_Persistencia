@@ -2,7 +2,8 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.RubinLavi_Roy_practicaPMDM_Persistencia" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/light_green</item>
+        <item name="android:colorBackground">@color/cream</item>
     </style>
 
     <style name="Theme.RubinLavi_Roy_practicaPMDM_Persistencia" parent="Base.Theme.RubinLavi_Roy_practicaPMDM_Persistencia" />

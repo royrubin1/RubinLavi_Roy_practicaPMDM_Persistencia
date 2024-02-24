@@ -29,7 +29,7 @@ class TasksFragment : Fragment() {
     private val viewModel: TaskViewModel by viewModels()
     private var _binding: FragmentTasksBinding? = null
     private val binding get() = _binding!!
-    private var modulesList: List<String> = listOf()
+    private var modulesList: List<String> = listOf("Todos los módulos")
     private lateinit var taskAdapter: TaskAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -109,9 +109,9 @@ class TasksFragment : Fragment() {
             val response = RetrofitInstance.api.getStudentModules().execute()
             if (response.isSuccessful && response.body() != null) {
                 val modules = response.body()!!.modules
-                modulesList = modules
+                modulesList += modules
                 withContext(Dispatchers.Main) {
-                    val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, modules)
+                    val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, modulesList)
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     binding.spinnerModules.adapter = adapter
                 }
