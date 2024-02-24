@@ -6,8 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.room.Task
 
-class TaskAdapter(private var tasks: List<Task>) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
+class TaskAdapter(var tasks: List<Task>, private val onItemClicked: (Task) -> Unit) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     class TaskViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.taskTitle)
@@ -23,6 +24,10 @@ class TaskAdapter(private var tasks: List<Task>) : RecyclerView.Adapter<TaskAdap
         val task = tasks[position]
         holder.title.text = task.title
         holder.description.text = task.description
+
+        holder.itemView.setOnClickListener {
+            onItemClicked(task)
+        }
 
         updateTaskAppearance(task, holder)
     }

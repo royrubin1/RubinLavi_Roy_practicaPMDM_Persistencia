@@ -6,20 +6,25 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.Task
+import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.R
 import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.TaskAdapter
+import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.TaskViewModel
 import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.databinding.FragmentTasksBinding
 
 class TasksFragment : Fragment() {
 
+    private val viewModel: TaskViewModel by viewModels()
     private var _binding: FragmentTasksBinding? = null
     private val binding get() = _binding!!
     private lateinit var taskAdapter: TaskAdapter
-    private var allTasks = listOf<Task>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentTasksBinding.inflate(inflater, container, false)
@@ -30,27 +35,25 @@ class TasksFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         setupSpinner()
-        initializeTasks()
-    }
 
-    private fun initializeTasks() {
-        allTasks = listOf(
-            Task("Tarea 1", "Descripción de la tarea 1", "Acceso a Datos"),
-            Task("Tarea 2", "Descripción de la tarea 2", "Programación Multimedia y Dispositivos Móviles"),
-            Task("Tarea 3", "Descripción de la tarea 3", "Desarrollo de Interfaces"),
-            Task("Tarea 4", "Descripción de la tarea 4", "Sistemas de Gestión Empresarial"),
-            Task("Tarea 5", "Descripción de la tarea 5", "Acceso a Datos")
-        )
-        taskAdapter.updateTasks(allTasks)
+        binding.buttonAddTask.setOnClickListener {
+            findNavController().navigate(R.id.action_tasksFragment_to_addEditTaskFragment)
+        }
+
+        viewModel.getAllTasks().observe(viewLifecycleOwner, Observer { tasks ->
+            taskAdapter.updateTasks(tasks)
+        })
     }
 
     private fun filterTasks(module: String) {
-        val filteredTasks = if (module == "Todos los módulos") {
-            allTasks
-        } else {
-            allTasks.filter { it.module == module }
-        }
-        taskAdapter.updateTasks(filteredTasks)
+        viewModel.getAllTasks().observe(viewLifecycleOwner, Observer { tasks ->
+            val filteredTasks = if (module == "Todos los módulos") {
+                tasks
+            } else {
+                tasks.filter { it.module == module }
+            }
+            taskAdapter.updateTasks(filteredTasks)
+        })
     }
 
     private fun setupSpinner() {
@@ -71,7 +74,10 @@ class TasksFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        taskAdapter = TaskAdapter(allTasks)
+        taskAdapter = TaskAdapter(emptyList()) { selectedTask ->
+            val bundle = bundleOf("taskId" to selectedTask.id)
+            findNavController().navigate(R.id.action_tasksFragment_to_addEditTaskFragment, bundle)
+        }
 
         binding.recyclerViewTasks.apply {
             layoutManager = LinearLayoutManager(context)
@@ -85,11 +91,15 @@ class TasksFragment : Fragment() {
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
-                allTasks[position].isDone = !allTasks[position].isDone
-                taskAdapter.notifyItemChanged(position)
+                val task = taskAdapter.tasks[position]
+                viewModel.deleteTask(task)
             }
         })
         itemTouchHelper.attachToRecyclerView(binding.recyclerViewTasks)
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

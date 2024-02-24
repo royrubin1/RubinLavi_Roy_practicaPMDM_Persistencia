@@ -9,11 +9,20 @@
         android:id="@+id/tasksFragment"
         android:name="dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.fragments.TasksFragment"
         android:label="fragment_tasks"
-        tools:layout="@layout/fragment_tasks" />
+        tools:layout="@layout/fragment_tasks">
+        <action
+            android:id="@+id/action_tasksFragment_to_addEditTaskFragment"
+            app:destination="@id/addEditTaskFragment" />
+    </fragment>
+
 
     <fragment
         android:id="@+id/addEditTaskFragment"
         android:name="dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.fragments.AddEditTaskFragment"
         android:label="fragment_add_edit_task"
-        tools:layout="@layout/fragment_add_edit_task" />
+        tools:layout="@layout/fragment_add_edit_task">
+        <action
+            android:id="@+id/action_addEditTaskFragment_to_tasksFragment"
+            app:destination="@id/tasksFragment" />
+    </fragment>
 </navigation>

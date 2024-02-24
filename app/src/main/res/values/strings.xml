@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">RubinLavi_Roy_practicaPMDM_Persistencia</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="task_title">Título</string>
+    <string name="task_description">Descripción</string>
+    <string name="task_module">Módulo</string>
+    <string name="task_done">Hecho</string>
+    <string name="save_task">Guardar</string>
+    <string name="add_task">Añadir Tarea</string>
 </resources>
