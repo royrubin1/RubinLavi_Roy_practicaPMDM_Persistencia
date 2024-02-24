@@ -17,13 +17,19 @@ import androidx.recyclerview.widget.RecyclerView
 import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.R
 import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.TaskAdapter
 import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.TaskViewModel
+import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.api.RetrofitInstance
 import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.databinding.FragmentTasksBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class TasksFragment : Fragment() {
 
     private val viewModel: TaskViewModel by viewModels()
     private var _binding: FragmentTasksBinding? = null
     private val binding get() = _binding!!
+    private var modulesList: List<String> = listOf()
     private lateinit var taskAdapter: TaskAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -57,14 +63,14 @@ class TasksFragment : Fragment() {
     }
 
     private fun setupSpinner() {
-        val modules = arrayOf("Todos los módulos", "Acceso a Datos", "Programación Multimedia y Dispositivos Móviles", "Desarrollo de Interfaces", "Sistemas de Gestión Empresarial")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, modules)
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, modulesList)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerModules.adapter = adapter
+        loadModules()
 
         binding.spinnerModules.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                filterTasks(modules[position])
+                filterTasks(modulesList[position])
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -96,6 +102,21 @@ class TasksFragment : Fragment() {
             }
         })
         itemTouchHelper.attachToRecyclerView(binding.recyclerViewTasks)
+    }
+
+    private fun loadModules() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val response = RetrofitInstance.api.getStudentModules().execute()
+            if (response.isSuccessful && response.body() != null) {
+                val modules = response.body()!!.modules
+                modulesList = modules
+                withContext(Dispatchers.Main) {
+                    val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, modules)
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    binding.spinnerModules.adapter = adapter
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {

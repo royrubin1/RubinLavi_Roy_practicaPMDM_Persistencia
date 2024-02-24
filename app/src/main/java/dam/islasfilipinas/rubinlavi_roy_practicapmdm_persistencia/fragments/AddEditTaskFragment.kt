@@ -10,14 +10,20 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.R
 import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.TaskViewModel
+import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.api.RetrofitInstance
 import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.databinding.FragmentAddEditTaskBinding
 import dam.islasfilipinas.rubinlavi_roy_practicapmdm_persistencia.room.Task
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AddEditTaskFragment : Fragment() {
 
     private var _binding: FragmentAddEditTaskBinding? = null
     private val binding get() = _binding!!
     private val viewModel: TaskViewModel by viewModels()
+    private var modulesList: List<String> = listOf()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentAddEditTaskBinding.inflate(inflater, container, false)
@@ -27,18 +33,20 @@ class AddEditTaskFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val modules = arrayOf("Acceso a Datos", "Programación Multimedia y Dispositivos Móviles", "Desarrollo de Interfaces", "Sistemas de Gestión Empresarial")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, modules)
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, listOf<String>())
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerTaskModule.adapter = adapter
+        loadModules()
 
         val taskId = arguments?.getInt("taskId")
         if (taskId != null && taskId != 0) {
             viewModel.getTaskById(taskId).observe(viewLifecycleOwner) { task ->
                 binding.editTextTaskTitle.setText(task.title)
                 binding.editTextTaskDescription.setText(task.description)
-                val modulePosition = modules.indexOf(task.module)
-                binding.spinnerTaskModule.setSelection(modulePosition)
+                val modulePosition = modulesList.indexOf(task.module)
+                if (modulePosition >= 0) {
+                    binding.spinnerTaskModule.setSelection(modulePosition)
+                }
             }
         }
 
@@ -60,6 +68,21 @@ class AddEditTaskFragment : Fragment() {
             viewModel.updateTask(task)
         }
         findNavController().navigate(R.id.action_addEditTaskFragment_to_tasksFragment)
+    }
+
+    private fun loadModules() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val response = RetrofitInstance.api.getStudentModules().execute()
+            if (response.isSuccessful && response.body() != null) {
+                val modules = response.body()!!.modules
+                modulesList = modules
+                withContext(Dispatchers.Main) {
+                    val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, modules)
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    binding.spinnerTaskModule.adapter = adapter
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
