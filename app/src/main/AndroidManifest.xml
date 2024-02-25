@@ -5,9 +5,9 @@
         android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/task_icon"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/task_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.RubinLavi_Roy_practicaPMDM_Persistencia">
 
